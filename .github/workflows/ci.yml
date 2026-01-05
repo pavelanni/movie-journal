@@ -20,11 +20,17 @@ jobs:
         with:
           go-version: '1.23'
 
-      - name: Build
-        run: make build
+      - name: Install templ
+        run: go install github.com/a-h/templ/cmd/templ@latest
 
-      - name: Run tests (when available)
-        run: go test -v ./cmd/... ./pkg/config/...
+      - name: Generate templ
+        run: templ generate
+
+      - name: Build
+        run: make build-go
+
+      - name: Run tests
+        run: go test -v ./...
         continue-on-error: true
 
   lint:
@@ -37,6 +43,12 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.23'
+
+      - name: Install templ
+        run: go install github.com/a-h/templ/cmd/templ@latest
+
+      - name: Generate templ
+        run: templ generate
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6

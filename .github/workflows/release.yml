@@ -22,6 +22,9 @@ jobs:
         with:
           go-version: '1.23'
 
+      - name: Install templ
+        run: go install github.com/a-h/templ/cmd/templ@latest
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:

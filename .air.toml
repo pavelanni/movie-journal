@@ -1,0 +1,62 @@
+# Air configuration for live reload during development
+# Install air: go install github.com/air-verse/air@latest
+
+root = "."
+testdata_dir = "testdata"
+tmp_dir = "tmp"
+
+[build]
+  # Pre-build commands
+  pre_cmd = ["templ generate"]
+  # Build command
+  cmd = "go build -o tmp/main ./cmd/movie-journal"
+  # Entrypoint (replaces deprecated bin)
+  entrypoint = ["tmp/main", "serve"]
+  # Watch these file extensions
+  include_ext = ["go", "templ"]
+  # Exclude directories
+  exclude_dir = ["tmp", "vendor", "testdata", "static", "node_modules", "build"]
+  # Exclude files matching patterns
+  exclude_file = []
+  # Exclude unchanged files
+  exclude_unchanged = false
+  # Exclude regex patterns
+  exclude_regex = ["_test.go", "_templ.go"]
+  # Follow symlinks
+  follow_symlink = false
+  # Stop running old binary immediately
+  kill_delay = "0s"
+  # Log file location
+  log = "build-errors.log"
+  # Rerun binary on build error
+  rerun = false
+  # Rerun delay
+  rerun_delay = 500
+  # Send interrupt signal; if not, send kill signal
+  send_interrupt = false
+  # Stop immediately on error
+  stop_on_error = false
+
+[color]
+  # Colorize output
+  app = ""
+  build = "yellow"
+  main = "magenta"
+  runner = "green"
+  watcher = "cyan"
+
+[log]
+  # Show main log
+  main_only = false
+  # Show timestamp
+  time = false
+
+[misc]
+  # Clean tmp directory on exit
+  clean_on_exit = false
+
+[screen]
+  # Clear screen between builds
+  clear_on_rebuild = false
+  # Keep scroll position
+  keep_scroll = true

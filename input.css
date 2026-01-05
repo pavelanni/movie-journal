@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@source "./templates/**/*.templ";
+@source "./templates/**/*.go";
+
+@layer components {
+    .htmx-indicator {
+        display: none;
+    }
+
+    .htmx-request .htmx-indicator,
+    .htmx-request.htmx-indicator {
+        display: block;
+    }
+
+    /* Spinning animation for the loader */
+    .spinner {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+}

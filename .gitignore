@@ -37,10 +37,29 @@ go.work.sum
 .DS_Store
 Thumbs.db
 
+# SQLite database files
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
 # Temporary files
 *.tmp
 *.log
+tmp/
 
-# Local configuration
-*.local
+# Tailwind standalone binary
+tailwindcss
+
+# Generated CSS (will be regenerated)
+static/css/tailwind.css
+
+# Generated templ files (will be regenerated)
+*_templ.go
+
+# Air temporary directory
+tmp/
+
+# Environment files with secrets
 .env
+.env.local

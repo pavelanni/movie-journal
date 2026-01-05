@@ -1,0 +1,140 @@
+# GoReleaser configuration for Movie Journal
+# See https://goreleaser.com for documentation
+
+version: 2
+
+before:
+  hooks:
+    # Ensure dependencies are up to date
+    - go mod tidy
+    # Generate templ templates
+    - templ generate
+
+builds:
+  - id: movie-journal
+    binary: movie-journal
+    main: ./cmd/movie-journal
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    # Build flags to include version information
+    ldflags:
+      - -s -w
+      - -X main.Version={{.Version}}
+      - -X main.Commit={{.Commit}}
+      - -X main.BuildDate={{.Date}}
+
+archives:
+  - id: default
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # Include additional files in the archive
+    files:
+      - README.md
+      - LICENSE*
+
+nfpms:
+  - id: packages
+    package_name: movie-journal
+    vendor: Pavel Anni
+    homepage: https://github.com/pavelanni/movie-journal
+    maintainer: Pavel Anni <pavelanni@gmail.com>
+    description: Personal movie diary application for tracking films with notes and research moments
+    license: MIT
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/bin
+    # Package dependencies
+    dependencies: []
+    # Files to include in the package
+    contents:
+      - src: README.md
+        dst: /usr/share/doc/movie-journal/README.md
+    # RPM-specific configuration
+    rpm:
+      group: Applications/Internet
+      compression: lzma
+    # DEB-specific configuration
+    deb:
+      compression: xz
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - '^ci:'
+      - 'typo'
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: Bug Fixes
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: Performance Improvements
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: Others
+      order: 999
+
+release:
+  github:
+    owner: pavelanni
+    name: movie-journal
+  draft: false
+  prerelease: auto
+  mode: append
+  header: |
+    ## Movie Journal {{.Version}}
+
+    Personal movie diary application for tracking films watched with notes and research moments.
+
+    ### Installation
+
+    #### Linux (DEB)
+    ```bash
+    wget https://github.com/pavelanni/movie-journal/releases/download/{{.Tag}}/movie-journal_{{.Version}}_Linux_x86_64.deb
+    sudo dpkg -i movie-journal_{{.Version}}_Linux_x86_64.deb
+    ```
+
+    #### Linux (RPM)
+    ```bash
+    wget https://github.com/pavelanni/movie-journal/releases/download/{{.Tag}}/movie-journal_{{.Version}}_Linux_x86_64.rpm
+    sudo rpm -i movie-journal_{{.Version}}_Linux_x86_64.rpm
+    ```
+
+    #### Manual Installation
+    Download the appropriate archive for your platform from the assets below and extract the binary to your PATH.
+
+  footer: |
+    **Full Changelog**: https://github.com/pavelanni/movie-journal/compare/{{.PreviousTag}}...{{.Tag}}
+
+    ---
+    For support and questions, please open an issue on GitHub.
+
+# Additional metadata
+metadata:
+  mod_timestamp: '{{ .CommitTimestamp }}'

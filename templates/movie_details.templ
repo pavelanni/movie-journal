@@ -1,0 +1,111 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/pavelanni/movie-journal/internal/models"
+)
+
+// MovieDetails renders the expanded movie detail view (partial - no layout wrapper).
+templ MovieDetails(entry models.DiaryEntry) {
+	<div class="bg-white rounded-lg shadow-lg p-6"
+		id={ fmt.Sprintf("entry-%d", entry.ID) }
+		hx-get={ fmt.Sprintf("/diary-short/%d", entry.ID) }
+		hx-target="closest div"
+		hx-swap="outerHTML"
+	>
+		<!-- Header with close button -->
+		<div class="flex justify-between items-start mb-4">
+			<div>
+				if entry.Movie != nil {
+					<h2 class="text-2xl font-bold text-gray-800">{ entry.Movie.Title }</h2>
+					<p class="text-gray-500">{ fmt.Sprintf("%d", entry.Movie.Year) } · { entry.Movie.Director } · { entry.Movie.Genre }</p>
+				}
+			</div>
+			<button
+				class="text-gray-400 hover:text-gray-600 text-2xl"
+				hx-get="/empty"
+				hx-target="#detail-panel"
+				hx-swap="innerHTML"
+			>
+			<!-- &times; is the multiplication sign (×) which means "close"-->
+				&times;
+			</button>
+		</div>
+
+		<!-- Movie poster and details -->
+		<div class="flex gap-6">
+			if entry.Movie != nil && entry.Movie.PosterURL != "" {
+				<img
+					src={ entry.Movie.PosterURL }
+					alt={ entry.Movie.Title }
+					class="w-32 h-48 object-cover rounded shadow"
+				/>
+			}
+			<div class="flex-1">
+				<!-- Overview -->
+				if entry.Movie != nil && entry.Movie.Overview != "" {
+					<p class="text-gray-600 mb-4">{ entry.Movie.Overview }</p>
+				}
+
+				<!-- Watch info -->
+				<div class="text-sm text-gray-500 mb-4">
+					<p>
+						<span class="font-medium">Watched:</span> { entry.WatchedAt.Format("January 2, 2006") }
+						if entry.Location != "" {
+							<span>&nbsp;@{ entry.Location }</span>
+						}
+						if entry.WatchedWith != "" {
+							<span> with { entry.WatchedWith }</span>
+						}
+					</p>
+					<p class="mt-1">
+						<span class="font-medium">Rating:</span>
+						@StarRating(entry.Rating)
+					</p>
+				</div>
+
+				<!-- Notes -->
+				if entry.Notes != "" {
+					<div class="bg-gray-50 rounded p-3 mb-4">
+						<p class="text-sm font-medium text-gray-700 mb-1">Notes</p>
+						<p class="text-gray-600">{ entry.Notes }</p>
+					</div>
+				}
+			</div>
+		</div>
+
+		<!-- Research moments -->
+		if len(entry.Lookups) > 0 {
+			<div class="mt-6 border-t pt-4">
+				<h3 class="text-lg font-semibold text-gray-800 mb-3">
+					Research Moments ({ fmt.Sprintf("%d", len(entry.Lookups)) })
+				</h3>
+				<div class="space-y-3">
+					for _, lookup := range entry.Lookups {
+						<div class="bg-blue-50 rounded p-3">
+							<p class="text-sm font-medium text-blue-800">{ lookup.Question }</p>
+							if lookup.Answer != "" {
+								<p class="text-sm text-blue-600 mt-1">{ lookup.Answer }</p>
+							}
+							<p class="text-xs text-blue-400 mt-1">{ string(lookup.Category) }</p>
+						</div>
+					}
+				</div>
+			</div>
+		}
+
+		<!-- Action buttons -->
+		<div class="mt-6 pt-4 border-t flex justify-end gap-2">
+			<button
+				class="px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors"
+				hx-delete={ fmt.Sprintf("/diary/%d", entry.ID) }
+				hx-target={ fmt.Sprintf("#entry-%d", entry.ID) }
+				hx-swap="outerHTML"
+				hx-confirm="Delete this entry?"
+			>
+				Delete Entry
+			</button>
+			<span class="text-xs text-gray-400">Entry #{ fmt.Sprintf("%d", entry.ID) }</span>
+		</div>
+	</div>
+}

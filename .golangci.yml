@@ -20,11 +20,13 @@ run:
     - testdata
     - dist
     - build
+    - tmp
 
   # Which files to skip: they will be analyzed, but issues from them won't be reported
   skip-files:
     - ".*\\.pb\\.go$"
     - ".*_generated\\.go$"
+    - ".*_templ\\.go$"
 
 output:
   # Format: colored-line-number|line-number|json|tab|checkstyle|code-climate|junit-xml|github-actions
@@ -76,15 +78,6 @@ formatters:
   enable:
     - gofmt         # Check whether code was gofmt-ed
     - goimports     # Check import statements are formatted
-
-    # May be too strict for some projects, uncomment if desired:
-    # - gochecknoglobals  # Check that no globals are present
-    # - gochecknoinits    # Check that no init functions are present
-    # - goerr113          # Check error wrapping in Go 1.13+
-    # - gomnd             # Detect magic numbers
-    # - exhaustive        # Check exhaustiveness of enum switch statements
-    # - nlreturn          # Check for new line before return
-    # - wsl               # Whitespace Linter
 
 linters-settings:
   errcheck:
@@ -205,7 +198,7 @@ linters-settings:
     checks: ["all", "-ST1000", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]
 
     # https://staticcheck.io/docs/options#initialisms
-    initialisms: ["ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "LHS", "QPS", "RAM", "RHS", "RPC", "SLA", "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "UID", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSRF", "XSS", "IAM"]
+    initialisms: ["ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "LHS", "QPS", "RAM", "RHS", "RPC", "SLA", "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "UID", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSRF", "XSS", "IAM", "TMDB"]
 
   errorlint:
     # Check whether fmt.Errorf uses the %w verb for formatting errors
@@ -244,6 +237,11 @@ issues:
         - dupl
         - gosec
         - goconst
+
+    # Exclude generated templ files
+    - path: _templ\.go
+      linters:
+        - all
 
     # Exclude known issues in vendor
     - path: vendor/
