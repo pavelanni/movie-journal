@@ -49,7 +49,7 @@ templ MovieCard(entry models.DiaryEntry) {
 				<p class="text-xs text-gray-400 mt-2">
 					{ entry.WatchedAt.Format("Jan 2, 2006") }
 					if entry.WatchedWith != "" {
-						<span> with { entry.WatchedWith }</span>
+						<span>with { entry.WatchedWith }</span>
 					}
 					if entry.Location != "" {
 						<span>, @{ entry.Location }</span>

@@ -1,0 +1,11 @@
+package templates
+
+// DiaryNew renders the page for creating a new diary entry.
+templ DiaryNew() {
+	@Layout("Log a New Movie") {
+		<div class="max-w-2xl mx-auto">
+			<h1 class="text-2xl font-bold text-gray-800 mb-6">Log a New Movie</h1>
+			@DiaryForm(nil, "/diary/new", "POST")
+		</div>
+	}
+}

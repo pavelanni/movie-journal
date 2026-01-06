@@ -2,6 +2,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -131,6 +132,45 @@ func (h *Handlers) GetRecentEntries(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to render template", http.StatusInternalServerError)
 		return
 	}
+}
+
+// NewDiaryEntryForm renders the form to create a new diary entry.
+func (h *Handlers) NewDiaryEntryForm(w http.ResponseWriter, r *http.Request) {
+	err := templates.DiaryNew().Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, "Failed to render template", http.StatusInternalServerError)
+		return
+	}
+}
+
+// CreateDiaryEntry handles the submission of a new diary entry.
+func (h *Handlers) CreateDiaryEntry(w http.ResponseWriter, r *http.Request) {
+	// Parse form data
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	// Extract form values (in a real app, validate and save to DB)
+	watchedDate := r.FormValue("watched_date")
+	movieTitle := r.FormValue("movie_title")
+	watchedLocation := r.FormValue("watched_location")
+	ratingStr := r.FormValue("rating")
+	notes := r.FormValue("notes")
+	watchedWith := r.FormValue("watched_with")
+
+	// For now, just log the received data (replace with DB save logic)
+	slog.Info("Received new diary entry",
+		slog.String("watched_date", watchedDate),
+		slog.String("watched_location", watchedLocation),
+		slog.String("movie_title", movieTitle),
+		slog.String("rating", ratingStr),
+		slog.String("notes", notes),
+		slog.String("watched_with", watchedWith),
+	)
+
+	// After logging, redirect back to home page (in a real app, redirect to the new entry's page)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 // DeleteDiaryEntry deletes a diary entry (for HTMX).

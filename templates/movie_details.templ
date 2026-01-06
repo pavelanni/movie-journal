@@ -7,7 +7,8 @@ import (
 
 // MovieDetails renders the expanded movie detail view (partial - no layout wrapper).
 templ MovieDetails(entry models.DiaryEntry) {
-	<div class="bg-white rounded-lg shadow-lg p-6"
+	<div
+		class="bg-white rounded-lg shadow-lg p-6"
 		id={ fmt.Sprintf("entry-%d", entry.ID) }
 		hx-get={ fmt.Sprintf("/diary-short/%d", entry.ID) }
 		hx-target="closest div"
@@ -27,11 +28,10 @@ templ MovieDetails(entry models.DiaryEntry) {
 				hx-target="#detail-panel"
 				hx-swap="innerHTML"
 			>
-			<!-- &times; is the multiplication sign (×) which means "close"-->
+				<!-- &times; is the multiplication sign (×) which means "close"-->
 				&times;
 			</button>
 		</div>
-
 		<!-- Movie poster and details -->
 		<div class="flex gap-6">
 			if entry.Movie != nil && entry.Movie.PosterURL != "" {
@@ -46,7 +46,6 @@ templ MovieDetails(entry models.DiaryEntry) {
 				if entry.Movie != nil && entry.Movie.Overview != "" {
 					<p class="text-gray-600 mb-4">{ entry.Movie.Overview }</p>
 				}
-
 				<!-- Watch info -->
 				<div class="text-sm text-gray-500 mb-4">
 					<p>
@@ -55,7 +54,7 @@ templ MovieDetails(entry models.DiaryEntry) {
 							<span>&nbsp;@{ entry.Location }</span>
 						}
 						if entry.WatchedWith != "" {
-							<span> with { entry.WatchedWith }</span>
+							<span>with { entry.WatchedWith }</span>
 						}
 					</p>
 					<p class="mt-1">
@@ -63,7 +62,6 @@ templ MovieDetails(entry models.DiaryEntry) {
 						@StarRating(entry.Rating)
 					</p>
 				</div>
-
 				<!-- Notes -->
 				if entry.Notes != "" {
 					<div class="bg-gray-50 rounded p-3 mb-4">
@@ -73,7 +71,6 @@ templ MovieDetails(entry models.DiaryEntry) {
 				}
 			</div>
 		</div>
-
 		<!-- Research moments -->
 		if len(entry.Lookups) > 0 {
 			<div class="mt-6 border-t pt-4">
@@ -93,7 +90,6 @@ templ MovieDetails(entry models.DiaryEntry) {
 				</div>
 			</div>
 		}
-
 		<!-- Action buttons -->
 		<div class="mt-6 pt-4 border-t flex justify-end gap-2">
 			<button

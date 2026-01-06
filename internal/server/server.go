@@ -68,6 +68,9 @@ func (s *Server) setupRoutes() {
 	s.mux.HandleFunc("DELETE /diary/{id}", s.handlers.DeleteDiaryEntry)
 	s.mux.HandleFunc("GET /diary-short/{id}", s.handlers.GetDiaryEntryShort)
 	s.mux.HandleFunc("GET /recent-entries", s.handlers.GetRecentEntries)
+	s.mux.HandleFunc("GET /diary/new", s.handlers.NewDiaryEntryForm)
+	s.mux.HandleFunc("POST /diary/new", s.handlers.CreateDiaryEntry)
+
 }
 
 // Start starts the HTTP server.

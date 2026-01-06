@@ -2,25 +2,25 @@ package templates
 
 // About renders the about page.
 templ About() {
-    @Layout("About") {
-        <div class="bg-white rounded-lg shadow p-6">
-            <h1 class="text-3xl font-bold text-gray-800 mb-4">About Movie Journal</h1>
-            <p class="text-gray-600 mb-4">
-                Movie Journal is a personal project designed to help movie enthusiasts track the films they watch,
-                rate them, and capture those research moments when they pause to look something up.
-            </p>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-2">Features</h2>
-            <ul class="list-disc list-inside text-gray-600 mb-4">
-                <li>Log movies with details like title, year, poster, and more.</li>
-                <li>Rate movies with a star rating system.</li>
-                <li>Capture research moments with notes and lookups.</li>
-                <li>View a diary of all logged movies with filtering options.</li>
-            </ul>
-            <h2 class="text-2xl font-semibold text-gray-800 mb-2">Technologies Used</h2>
-            <p class="text-gray-600">
-                This application is built using Go for the backend, HTML/CSS with Tailwind for the frontend,
-                and SQLite for data storage. It leverages htmx for dynamic content updates without full page reloads.
-            </p>
-        </div>
-    }
+	@Layout("About") {
+		<div class="bg-white rounded-lg shadow p-6">
+			<h1 class="text-3xl font-bold text-gray-800 mb-4">About Movie Journal</h1>
+			<p class="text-gray-600 mb-4">
+				Movie Journal is a personal project designed to help movie enthusiasts track the films they watch,
+				rate them, and capture those research moments when they pause to look something up.
+			</p>
+			<h2 class="text-2xl font-semibold text-gray-800 mb-2">Features</h2>
+			<ul class="list-disc list-inside text-gray-600 mb-4">
+				<li>Log movies with details like title, year, poster, and more.</li>
+				<li>Rate movies with a star rating system.</li>
+				<li>Capture research moments with notes and lookups.</li>
+				<li>View a diary of all logged movies with filtering options.</li>
+			</ul>
+			<h2 class="text-2xl font-semibold text-gray-800 mb-2">Technologies Used</h2>
+			<p class="text-gray-600">
+				This application is built using Go for the backend, HTML/CSS with Tailwind for the frontend,
+				and SQLite for data storage. It leverages htmx for dynamic content updates without full page reloads.
+			</p>
+		</div>
+	}
 }
