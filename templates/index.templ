@@ -43,15 +43,6 @@ templ Index(recentEntries []models.DiaryEntry, currentMinRating string) {
 	}
 }
 
-func highlightIfCurrentRating(buttonRating, currentMinRating string) string {
-	normalButtonClass := "px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-	highlightedButtonClass := "px-4 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition-colors"
-	if currentMinRating == buttonRating {
-		return highlightedButtonClass
-	}
-	return normalButtonClass
-}
-
 templ RecentEntries(entries []models.DiaryEntry, currentMinRating string) {
 	<div
 		hx-get={ recentEntriesURL(currentMinRating) }
@@ -122,4 +113,13 @@ func recentEntriesURL(minRating string) string {
 		return "/recent-entries"
 	}
 	return fmt.Sprintf("/recent-entries?min_rating=%s", minRating)
+}
+
+func highlightIfCurrentRating(buttonRating, currentMinRating string) string {
+	normalButtonClass := "px-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+	highlightedButtonClass := "px-4 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition-colors"
+	if currentMinRating == buttonRating {
+		return highlightedButtonClass
+	}
+	return normalButtonClass
 }

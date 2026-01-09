@@ -47,12 +47,12 @@ templ MovieCard(entry models.DiaryEntry) {
 				</div>
 				<!-- Watched info -->
 				<p class="text-xs text-gray-400 mt-2">
-					{ entry.WatchedAt.Format("Jan 2, 2006") }
+					{ entry.WatchedDate.Format("Jan 2, 2006") }
 					if entry.WatchedWith != "" {
 						<span>with { entry.WatchedWith }</span>
 					}
-					if entry.Location != "" {
-						<span>, @{ entry.Location }</span>
+					if entry.WatchedLocation != "" {
+						<span>, @{ entry.WatchedLocation }</span>
 					}
 				</p>
 				<!-- Notes preview -->
@@ -71,16 +71,6 @@ templ MovieCard(entry models.DiaryEntry) {
 			</div>
 		</div>
 	</div>
-}
-
-func getStarClass(rating int) string {
-	if rating >= 4 {
-		return "w-4 h-4 text-green-400"
-	} else if rating == 3 {
-		return "w-4 h-4 text-yellow-400"
-	} else {
-		return "w-4 h-4 text-red-400"
-	}
 }
 
 // StarRating renders a star rating display.

@@ -1,12 +1,17 @@
 package templates
 
-import "github.com/pavelanni/movie-journal/internal/models"
+import (
+	"fmt"
+	"github.com/pavelanni/movie-journal/internal/models"
+)
 
-// DiaryForm renders the form for creating or editing a diary entry.
-templ DiaryForm(entry *models.DiaryEntry, formAction string, formMethod string) {
+// DiaryEditForm renders the form for editing an existing diary entry.
+templ DiaryEditForm(entry *models.DiaryEntry) {
 	<form
-		action={ formAction }
-		method={ formMethod }
+		id={ fmt.Sprintf("entry-%d", entry.ID) }
+		hx-put={ fmt.Sprintf("/diary/%d", entry.ID) }
+		hx-target="this"
+		hx-swap="outerHTML"
 		class="bg-white rounded-lg shadow p-6 space-y-6"
 	>
 		<!-- Diary Entry Details -->
@@ -17,6 +22,7 @@ templ DiaryForm(entry *models.DiaryEntry, formAction string, formMethod string) 
 				id="watched_date"
 				name="watched_date"
 				class="w-full border border-gray-300 rounded-lg p-2"
+				value={ getWatchedDate(entry) }
 			/>
 			<label for="movie_title" class="block text-sm font-medium text-gray-700 mb-1">Movie</label>
 			<input
@@ -25,6 +31,7 @@ templ DiaryForm(entry *models.DiaryEntry, formAction string, formMethod string) 
 				name="movie_title"
 				class="w-full border border-gray-300 rounded-lg p-2"
 				placeholder="Start typing to search..."
+				value={ getMovieTitle(entry) }
 			/>
 			<label for="watched_location" class="block text-sm font-medium text-gray-700 mt-4">Location</label>
 			<input
@@ -32,7 +39,7 @@ templ DiaryForm(entry *models.DiaryEntry, formAction string, formMethod string) 
 				id="watched_location"
 				name="watched_location"
 				class="w-full border border-gray-300 rounded-lg p-2 mt-2"
-				placeholder="Home, Cinema, Friend's place..."
+				placeholder={ getWatchedLocation(entry) }
 			/>
 		</div>
 		<div>
@@ -42,7 +49,7 @@ templ DiaryForm(entry *models.DiaryEntry, formAction string, formMethod string) 
 				id="watched_with"
 				name="watched_with"
 				class="w-full border border-gray-300 rounded-lg p-2"
-				placeholder="e.g., Friends, Family"
+				placeholder={ getWatchedWith(entry) }
 			/>
 			<label for="rating" class="block text-sm font-medium text-gray-700 mt-4">Rating</label>
 			<select
@@ -88,12 +95,13 @@ templ DiaryForm(entry *models.DiaryEntry, formAction string, formMethod string) 
 				name="notes"
 				class="w-full border border-gray-300 rounded-lg p-2 mt-2"
 				rows="4"
-				placeholder="Your thoughts about the movie..."
+				placeholder={ getNotes(entry) }
 			></textarea>
 		</div>
 		<button
 			type="submit"
 			class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+			onclick="event.stopPropagation()"
 		>
 			Save Entry
 		</button>
