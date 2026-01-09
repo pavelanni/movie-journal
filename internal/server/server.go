@@ -14,16 +14,16 @@ import (
 
 // Config holds server configuration.
 type Config struct {
-	Port int
 	DB   *database.DB
+	Port int
 }
 
 // Server is the Movie Journal HTTP server.
 type Server struct {
-	config     Config
 	httpServer *http.Server
 	mux        *http.ServeMux
 	handlers   *handlers.Handlers
+	config     Config
 }
 
 // New creates a new server with the given configuration.
@@ -70,7 +70,8 @@ func (s *Server) setupRoutes() {
 	s.mux.HandleFunc("GET /recent-entries", s.handlers.GetRecentEntries)
 	s.mux.HandleFunc("GET /diary/new", s.handlers.NewDiaryEntryForm)
 	s.mux.HandleFunc("POST /diary/new", s.handlers.CreateDiaryEntry)
-
+	s.mux.HandleFunc("GET /diary-form/{id}", s.handlers.EditDiaryEntryForm)
+	s.mux.HandleFunc("PUT /diary/{id}", s.handlers.EditDiaryEntry)
 }
 
 // Start starts the HTTP server.

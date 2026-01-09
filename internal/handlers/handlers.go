@@ -45,40 +45,24 @@ func (h *Handlers) About(w http.ResponseWriter, r *http.Request) {
 
 // GetDiaryEntry returns a single diary entry's details (HTML fragment for HTMX).
 func (h *Handlers) GetDiaryEntry(w http.ResponseWriter, r *http.Request) {
-	// Extract ID from URL path
-	idStr := r.PathValue("id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
-		return
-	}
-
-	// Find entry in sample data (will be replaced with DB query later)
-	entries := getSampleEntries()
-	var found *models.DiaryEntry
-	for i := range entries {
-		if entries[i].ID == id {
-			found = &entries[i]
-			break
-		}
-	}
-
-	if found == nil {
-		http.Error(w, "Entry not found", http.StatusNotFound)
-		return
-	}
-
-	// Render just the details fragment (no layout wrapper)
-	err = templates.MovieDetails(*found).Render(r.Context(), w)
-	if err != nil {
-		http.Error(w, "Failed to render template", http.StatusInternalServerError)
-		return
-	}
+	h.renderDiaryEntry(w, r, func(entry models.DiaryEntry, w http.ResponseWriter, r *http.Request) error {
+		return templates.MovieDetails(entry).Render(r.Context(), w)
+	})
 }
 
 // GetDiaryEntryShort returns a single diary entry's as MovieCard (HTML fragment for HTMX).
 func (h *Handlers) GetDiaryEntryShort(w http.ResponseWriter, r *http.Request) {
-	// Extract ID from URL path
+	h.renderDiaryEntry(w, r, func(entry models.DiaryEntry, w http.ResponseWriter, r *http.Request) error {
+		return templates.MovieCard(entry).Render(r.Context(), w)
+	})
+}
+
+// renderDiaryEntry is a helper that extracts ID, finds entry, and renders using provided function.
+func (h *Handlers) renderDiaryEntry(
+	w http.ResponseWriter,
+	r *http.Request,
+	renderFunc func(models.DiaryEntry, http.ResponseWriter, *http.Request) error,
+) {
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -86,31 +70,20 @@ func (h *Handlers) GetDiaryEntryShort(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Find entry in sample data (will be replaced with DB query later)
 	entries := getSampleEntries()
-	var found *models.DiaryEntry
-	for i := range entries {
-		if entries[i].ID == id {
-			found = &entries[i]
-			break
-		}
-	}
-
+	found := getEntryByID(id, entries)
 	if found == nil {
 		http.Error(w, "Entry not found", http.StatusNotFound)
 		return
 	}
 
-	// Render just the MovieCard fragment (no layout wrapper)
-	err = templates.MovieCard(*found).Render(r.Context(), w)
-	if err != nil {
+	if err := renderFunc(*found, w, r); err != nil {
 		http.Error(w, "Failed to render template", http.StatusInternalServerError)
-		return
 	}
 }
 
+// GetRecentEntries returns filtered diary entries (HTML fragment for HTMX).
 func (h *Handlers) GetRecentEntries(w http.ResponseWriter, r *http.Request) {
-	// For now, use sample data until we implement database queries
 	entries := getSampleEntries()
 
 	rating := r.URL.Query().Get("min_rating")
@@ -118,15 +91,15 @@ func (h *Handlers) GetRecentEntries(w http.ResponseWriter, r *http.Request) {
 		minRating, err := strconv.Atoi(rating)
 		if err == nil {
 			filtered := make([]models.DiaryEntry, 0)
-			for _, entry := range entries {
-				if entry.Rating >= minRating {
-					filtered = append(filtered, entry)
+			for i := range entries {
+				if entries[i].Rating >= minRating {
+					filtered = append(filtered, entries[i])
 				}
 			}
 			entries = filtered
 		}
 	}
-	// Render just the RecentEntries fragment (no layout wrapper)
+
 	err := templates.RecentEntries(entries, rating).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, "Failed to render template", http.StatusInternalServerError)
@@ -173,11 +146,88 @@ func (h *Handlers) CreateDiaryEntry(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// EditDiaryEntryForm renders the form to edit an existing diary entry.
+func (h *Handlers) EditDiaryEntryForm(w http.ResponseWriter, r *http.Request) {
+	// Extract ID from URL path
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	// Find entry in sample data (will be replaced with DB query later)
+	entries := getSampleEntries()
+	found := getEntryByID(id, entries)
+
+	if found == nil {
+		http.Error(w, "Entry not found", http.StatusNotFound)
+		return
+	}
+
+	// Render the edit form
+	err = templates.DiaryEditForm(found).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, "Failed to render template", http.StatusInternalServerError)
+		return
+	}
+}
+
+// EditDiaryEntry handles the editing of an existing diary entry.
+func (h *Handlers) EditDiaryEntry(w http.ResponseWriter, r *http.Request) {
+	// Extract ID from URL path
+	idStr := r.PathValue("id")
+	// TODO: id will be used when we start working with DB
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	// Parse form data
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	// Extract form values (in a real app, validate and update in DB)
+	watchedDate := r.FormValue("watched_date")
+	movieTitle := r.FormValue("movie_title")
+	watchedLocation := r.FormValue("watched_location")
+	ratingStr := r.FormValue("rating")
+	notes := r.FormValue("notes")
+	watchedWith := r.FormValue("watched_with")
+
+	// For now, just log the received data (replace with DB update logic)
+	slog.Info("Received edit for diary entry",
+		slog.String("watched_date", watchedDate),
+		slog.String("watched_location", watchedLocation),
+		slog.String("movie_title", movieTitle),
+		slog.String("rating", ratingStr),
+		slog.String("notes", notes),
+		slog.String("watched_with", watchedWith),
+	)
+
+	// After logging, return to the Movie Details view (in a real app, fetch updated entry from DB)
+	entries := getSampleEntries()
+	entry := getEntryByID(id, entries)
+	if entry == nil {
+		http.Error(w, "Entry not found after edit", http.StatusNotFound)
+		return
+	}
+	err = templates.MovieDetails(*entry).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, "Failed to render template", http.StatusInternalServerError)
+		return
+	}
+}
+
 // DeleteDiaryEntry deletes a diary entry (for HTMX).
 func (h *Handlers) DeleteDiaryEntry(w http.ResponseWriter, r *http.Request) {
 	// Extract ID from URL path
 	idStr := r.PathValue("id")
-	_, err := strconv.ParseInt(idStr, 10, 64) // we don't use id for now, but it should be added when we start working with DB
+	// TODO: id will be used when we start working with DB
+	_, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
@@ -205,13 +255,15 @@ func getSampleEntries() []models.DiaryEntry {
 				PosterURL: "https://image.tmdb.org/t/p/w185/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
 				Director:  "David Fincher",
 				Genre:     "Drama",
-				Overview:  "A depressed man suffering from insomnia meets a strange soap salesman named Tyler Durden and soon finds himself living in his squalid house after his perfect apartment is destroyed.",
+				Overview: "A depressed man suffering from insomnia meets a strange soap salesman " +
+					"named Tyler Durden and soon finds himself living in his squalid house " +
+					"after his perfect apartment is destroyed.",
 			},
-			WatchedAt:   time.Now().AddDate(0, 0, -2),
-			Location:    "Home",
-			Rating:      5,
-			Notes:       "First rule of Fight Club...",
-			WatchedWith: "Sarah",
+			WatchedDate:     time.Now().AddDate(0, 0, -2),
+			WatchedLocation: "Home",
+			Rating:          5,
+			Notes:           "First rule of Fight Club...",
+			WatchedWith:     "Sarah",
 			Lookups: []models.Lookup{
 				{
 					ID:       1,
@@ -232,13 +284,15 @@ func getSampleEntries() []models.DiaryEntry {
 				PosterURL: "https://image.tmdb.org/t/p/w185/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
 				Director:  "Christopher Nolan",
 				Genre:     "Sci-Fi",
-				Overview:  "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life as payment for a task considered to be impossible: inception.",
+				Overview: "Cobb, a skilled thief who commits corporate espionage by infiltrating " +
+					"the subconscious of his targets is offered a chance to regain his old life " +
+					"as payment for a task considered to be impossible: inception.",
 			},
-			WatchedAt:   time.Now().AddDate(0, 0, -5),
-			Location:    "Cinema",
-			Rating:      3,
-			Notes:       "The ending still gets me every time. Is it real or not?",
-			WatchedWith: "",
+			WatchedDate:     time.Now().AddDate(0, 0, -5),
+			WatchedLocation: "Cinema",
+			Rating:          3,
+			Notes:           "The ending still gets me every time. Is it real or not?",
+			WatchedWith:     "",
 			Lookups: []models.Lookup{
 				{
 					ID:       2,
@@ -265,14 +319,25 @@ func getSampleEntries() []models.DiaryEntry {
 				PosterURL: "https://image.tmdb.org/t/p/w185/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
 				Director:  "Quentin Tarantino",
 				Genre:     "Crime",
-				Overview:  "A burger-loving hit man, his philosophical partner, a drug-addled gangster's moll and a washed-up boxer converge in this sprawling, comedic crime caper.",
+				Overview: "A burger-loving hit man, his philosophical partner, a drug-addled " +
+					"gangster's moll and a washed-up boxer converge in this sprawling, " +
+					"comedic crime caper.",
 			},
-			WatchedAt:   time.Now().AddDate(0, 0, -10),
-			Location:    "In-flight",
-			Rating:      4,
-			Notes:       "A masterpiece of non-linear storytelling.",
-			WatchedWith: "Mike",
-			Lookups:     []models.Lookup{},
+			WatchedDate:     time.Now().AddDate(0, 0, -10),
+			WatchedLocation: "In-flight",
+			Rating:          4,
+			Notes:           "A masterpiece of non-linear storytelling.",
+			WatchedWith:     "Mike",
+			Lookups:         []models.Lookup{},
 		},
 	}
+}
+
+func getEntryByID(id int64, entries []models.DiaryEntry) *models.DiaryEntry {
+	for i := range entries {
+		if entries[i].ID == id {
+			return &entries[i]
+		}
+	}
+	return nil
 }
